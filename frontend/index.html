@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What's Today?</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 80px auto; padding: 0 20px; color: #333; }
+    h1 { border-bottom: 2px solid #eee; padding-bottom: 12px; }
+    .card { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; margin-top: 20px; }
+    .date { font-size: 2em; font-weight: 700; margin-bottom: 16px; }
+    .events-label { font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.05em; color: #888; margin-bottom: 8px; }
+    .event { font-size: 1.2em; font-weight: 600; padding: 8px 0; border-bottom: 1px solid #eee; }
+    .event:last-child { border-bottom: none; }
+    .no-events { color: #aaa; font-style: italic; }
+    .loading { color: #aaa; font-style: italic; }
+    .error { color: #c0392b; }
+  </style>
+</head>
+<body>
+  <h1>What's Today?</h1>
+  <div class="card">
+    <div class="date" id="date"><span class="loading">Loading…</span></div>
+    <div class="events-label">Events Today</div>
+    <div id="events"><span class="loading">Loading…</span></div>
+  </div>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
