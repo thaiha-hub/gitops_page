@@ -1,0 +1,15 @@
+# OpenTofu / Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
+# Generated at deploy time — never commit
+frontend/config.js
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+lambda/handler.zip
