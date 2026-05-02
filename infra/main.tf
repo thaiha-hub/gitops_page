@@ -205,26 +205,13 @@ resource "aws_iam_role_policy" "github_actions" {
         Sid    = "S3Frontend"
         Effect = "Allow"
         Action = [
+          "s3:Get*",
+          "s3:List*",
           "s3:PutObject",
-          "s3:GetObject",
           "s3:DeleteObject",
-          "s3:ListBucket",
-          "s3:ListBucketVersions",
-          "s3:GetBucketAcl",
-          "s3:GetBucketCors",
-          "s3:GetBucketLogging",
-          "s3:GetBucketLocation",
-          "s3:GetBucketOwnershipControls",
-          "s3:GetBucketPolicy",
-          "s3:GetBucketTagging",
-          "s3:GetBucketVersioning",
-          "s3:GetBucketWebsite",
           "s3:PutBucketPolicy",
-          "s3:CreateBucket",
-          "s3:GetBucketPublicAccessBlock",
           "s3:PutBucketPublicAccessBlock",
-          "s3:GetEncryptionConfiguration",
-          "s3:GetLifecycleConfiguration"
+          "s3:CreateBucket"
         ]
         Resource = [
           "arn:aws:s3:::gitops-page-*",
@@ -271,16 +258,13 @@ resource "aws_iam_role_policy" "github_actions" {
         Sid    = "Lambda"
         Effect = "Allow"
         Action = [
+          "lambda:Get*",
+          "lambda:List*",
           "lambda:CreateFunction",
           "lambda:UpdateFunctionCode",
           "lambda:UpdateFunctionConfiguration",
-          "lambda:GetFunction",
-          "lambda:GetFunctionConfiguration",
-          "lambda:ListVersionsByFunction",
           "lambda:AddPermission",
           "lambda:RemovePermission",
-          "lambda:GetPolicy",
-          "lambda:ListTags",
           "lambda:TagResource"
         ]
         Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:gitops-status-page-*"
