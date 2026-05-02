@@ -227,10 +227,8 @@ resource "aws_iam_role_policy" "github_actions" {
           "s3:GetLifecycleConfiguration"
         ]
         Resource = [
-          "arn:aws:s3:::gitops-status-page-*",
-          "arn:aws:s3:::gitops-status-page-*/*",
-          "arn:aws:s3:::gitops-page-*",
-          "arn:aws:s3:::gitops-page-*/*"
+          aws_s3_bucket.frontend.arn,
+          "${aws_s3_bucket.frontend.arn}/*"
         ]
       },
       {
