@@ -7,6 +7,9 @@
 # Generated at deploy time — never commit
 frontend/config.js
 
+# Local documentation
+ARCHITECTURE.md
+
 # Python
 __pycache__/
 *.pyc
