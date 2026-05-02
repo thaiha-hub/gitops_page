@@ -1,0 +1,75 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-north-1
+  TF_VAR_github_repo: ${{ github.repository }}
+
+jobs:
+  test:
+    name: Test Lambda
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test dependencies
+        run: pip install -r lambda/requirements-dev.txt
+
+      - name: Run tests
+        run: pytest lambda
+
+  deploy:
+    name: Deploy AWS resources
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: OpenTofu init
+        working-directory: infra
+        run: tofu init
+
+      - name: OpenTofu apply
+        working-directory: infra
+        run: tofu apply -auto-approve
+
+      - name: Read OpenTofu outputs
+        working-directory: infra
+        run: |
+          echo "S3_BUCKET=$(tofu output -raw s3_bucket_name)" >> "$GITHUB_ENV"
+          echo "API_URL=$(tofu output -raw api_url)" >> "$GITHUB_ENV"
+          echo "CLOUDFRONT_DISTRIBUTION_ID=$(tofu output -raw cloudfront_distribution_id)" >> "$GITHUB_ENV"
+          echo "CLOUDFRONT_URL=$(tofu output -raw cloudfront_url)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create frontend runtime config
+        run: echo "window.API_URL='${API_URL}';" > frontend/config.js
+
+      - name: Upload frontend to S3
+        run: aws s3 sync frontend "s3://${S3_BUCKET}" --delete
+
+      - name: Invalidate CloudFront cache
+        run: aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" --paths "/*"

@@ -209,12 +209,22 @@ resource "aws_iam_role_policy" "github_actions" {
           "s3:GetObject",
           "s3:DeleteObject",
           "s3:ListBucket",
+          "s3:ListBucketVersions",
+          "s3:GetBucketAcl",
+          "s3:GetBucketCors",
+          "s3:GetBucketLogging",
           "s3:GetBucketLocation",
+          "s3:GetBucketOwnershipControls",
           "s3:GetBucketPolicy",
+          "s3:GetBucketTagging",
+          "s3:GetBucketVersioning",
+          "s3:GetBucketWebsite",
           "s3:PutBucketPolicy",
           "s3:CreateBucket",
           "s3:GetBucketPublicAccessBlock",
-          "s3:PutBucketPublicAccessBlock"
+          "s3:PutBucketPublicAccessBlock",
+          "s3:GetEncryptionConfiguration",
+          "s3:GetLifecycleConfiguration"
         ]
         Resource = [
           "arn:aws:s3:::gitops-status-page-*",
@@ -227,11 +237,16 @@ resource "aws_iam_role_policy" "github_actions" {
         Action = [
           "cloudfront:CreateInvalidation",
           "cloudfront:GetDistribution",
+          "cloudfront:GetDistributionConfig",
+          "cloudfront:ListDistributions",
+          "cloudfront:ListTagsForResource",
           "cloudfront:CreateDistribution",
           "cloudfront:UpdateDistribution",
           "cloudfront:TagResource",
           "cloudfront:CreateOriginAccessControl",
           "cloudfront:GetOriginAccessControl",
+          "cloudfront:GetOriginAccessControlConfig",
+          "cloudfront:UpdateOriginAccessControl",
           "cloudfront:DeleteOriginAccessControl"
         ]
         Resource = "*"
@@ -248,20 +263,21 @@ resource "aws_iam_role_policy" "github_actions" {
           "lambda:AddPermission",
           "lambda:RemovePermission",
           "lambda:GetPolicy",
+          "lambda:ListTags",
           "lambda:TagResource"
         ]
         Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:gitops-status-page-*"
       },
       {
-        Sid    = "APIGateway"
-        Effect = "Allow"
-        Action = ["apigateway:*"]
+        Sid      = "APIGateway"
+        Effect   = "Allow"
+        Action   = ["apigateway:*"]
         Resource = "arn:aws:apigateway:${var.aws_region}::*"
       },
       {
-        Sid    = "IAMPassRole"
-        Effect = "Allow"
-        Action = ["iam:PassRole"]
+        Sid      = "IAMPassRole"
+        Effect   = "Allow"
+        Action   = ["iam:PassRole"]
         Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-status-page-*"
       },
       {
@@ -270,6 +286,8 @@ resource "aws_iam_role_policy" "github_actions" {
         Action = [
           "iam:CreateRole",
           "iam:GetRole",
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
           "iam:AttachRolePolicy",
           "iam:DetachRolePolicy",
           "iam:PutRolePolicy",
@@ -286,9 +304,9 @@ resource "aws_iam_role_policy" "github_actions" {
         ]
       },
       {
-        Sid    = "STSState"
-        Effect = "Allow"
-        Action = ["sts:GetCallerIdentity"]
+        Sid      = "STSState"
+        Effect   = "Allow"
+        Action   = ["sts:GetCallerIdentity"]
         Resource = "*"
       }
     ]
