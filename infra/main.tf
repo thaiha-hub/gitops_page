@@ -195,7 +195,7 @@ resource "aws_iam_role" "github_actions" {
 }
 
 resource "aws_iam_role_policy" "github_actions" {
-  name = "gitops-status-page-deploy"
+  name = "gitops-page-deploy"
   role = aws_iam_role.github_actions.id
 
   policy = jsonencode({
@@ -227,8 +227,8 @@ resource "aws_iam_role_policy" "github_actions" {
           "s3:GetLifecycleConfiguration"
         ]
         Resource = [
-          "arn:aws:s3:::gitops-status-page-*",
-          "arn:aws:s3:::gitops-status-page-*/*"
+          aws_s3_bucket.frontend.arn,
+          "${aws_s3_bucket.frontend.arn}/*"
         ]
       },
       {
@@ -276,6 +276,7 @@ resource "aws_iam_role_policy" "github_actions" {
           "lambda:UpdateFunctionConfiguration",
           "lambda:GetFunction",
           "lambda:GetFunctionConfiguration",
+          "lambda:ListVersionsByFunction",
           "lambda:AddPermission",
           "lambda:RemovePermission",
           "lambda:GetPolicy",
@@ -312,7 +313,9 @@ resource "aws_iam_role_policy" "github_actions" {
           "iam:TagRole",
           "iam:CreateOpenIDConnectProvider",
           "iam:GetOpenIDConnectProvider",
-          "iam:TagOpenIDConnectProvider"
+          "iam:TagOpenIDConnectProvider",
+          "iam:DeleteOpenIDConnectProvider",
+          "iam:DeleteRole"
         ]
         Resource = [
           "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-status-page-*",
