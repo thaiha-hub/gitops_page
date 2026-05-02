@@ -1,24 +1,33 @@
 import json
 import datetime
+import urllib.request
+
+_cache = {}
 
 
-EVENTS = {
-    "01-01": ["New Year's Day"],
-    "01-13": ["Tjugondag Knut"],
-    "02-14": ["Valentine's Day"],
-    "04-22": ["Earth Day"],
-    "04-30": ["Valborg"],
-    "05-01": ["International Workers' Day"],
-    "06-05": ["World Environment Day"],
-    "06-06": ["Swedish National Day"],
-    "10-31": ["Halloween"],
-    "11-11": ["Singles' Day", "Armistice Day"],
-    "12-10": ["Nobel Day"],
-    "12-13": ["Lucia"],
-    "12-24": ["Christmas Eve"],
-    "12-25": ["Christmas"],
-    "12-31": ["New Year's Eve"],
-}
+def _fetch_year(year):
+    base = "https://api.dagsmart.se"
+
+    def fetch(path):
+        url = f"{base}/{path}?year={year}"
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            return json.loads(resp.read())
+
+    index = {}
+    for item in fetch("holidays"):
+        index.setdefault(item["date"], []).append(item["name"]["en"])
+    for item in fetch("half-days"):
+        index.setdefault(item["date"], []).append("Half-day (halvdag)")
+    for item in fetch("bridge-days"):
+        index.setdefault(item["date"], []).append("Bridge day (klämdag)")
+
+    return index
+
+
+def _get_events_index(year):
+    if year not in _cache:
+        _cache[year] = _fetch_year(year)
+    return _cache[year]
 
 
 def get_today():
@@ -26,8 +35,8 @@ def get_today():
 
 
 def get_events_for_date(date):
-    key = date.strftime("%m-%d")
-    return EVENTS.get(key, [])
+    index = _get_events_index(date.year)
+    return index.get(date.isoformat(), [])
 
 
 def handler(event, context):
