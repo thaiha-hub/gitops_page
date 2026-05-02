@@ -5,7 +5,7 @@ resource "random_id" "suffix" {
 
 # ── S3 bucket for static frontend files ──────────────────────────────────────
 resource "aws_s3_bucket" "frontend" {
-  bucket        = "gitops-status-page-${random_id.suffix.hex}"
+  bucket        = "gitops-page-${random_id.suffix.hex}"
   force_destroy = true
 }
 
@@ -19,7 +19,7 @@ resource "aws_s3_bucket_public_access_block" "frontend" {
 
 # ── CloudFront Origin Access Control (OAC) ───────────────────────────────────
 resource "aws_cloudfront_origin_access_control" "frontend" {
-  name                              = "gitops-status-page-oac"
+  name                              = "gitops-page-oac"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -229,6 +229,22 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = [
           "arn:aws:s3:::gitops-status-page-*",
           "arn:aws:s3:::gitops-status-page-*/*"
+        ]
+      },
+      {
+        Sid    = "OpenTofuState"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket",
+          "s3:GetBucketLocation",
+          "s3:GetBucketVersioning"
+        ]
+        Resource = [
+          "arn:aws:s3:::gitops-page-tfstate-*",
+          "arn:aws:s3:::gitops-page-tfstate-*/*"
         ]
       },
       {
