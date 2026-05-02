@@ -53,6 +53,10 @@ jobs:
         working-directory: infra
         run: tofu init
 
+      - name: OpenTofu apply (IAM policy first)
+        working-directory: infra
+        run: tofu apply -auto-approve -refresh=false -target=aws_iam_role_policy.github_actions
+
       - name: OpenTofu apply
         working-directory: infra
         run: tofu apply -auto-approve
