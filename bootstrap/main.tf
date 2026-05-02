@@ -3,7 +3,7 @@ resource "random_id" "suffix" {
 }
 
 resource "aws_s3_bucket" "opentofu_state" {
-  bucket = "gitops-status-page-tfstate-${random_id.suffix.hex}"
+  bucket = "gitops-page-tfstate-${random_id.suffix.hex}"
 }
 
 resource "aws_s3_bucket_versioning" "opentofu_state" {
