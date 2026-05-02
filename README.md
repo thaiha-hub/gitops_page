@@ -39,7 +39,7 @@ tofu -chdir=bootstrap output opentofu_state_bucket
 Copy the output bucket name into `infra/providers.tf`, replacing:
 
 ```hcl
-bucket = "gitops-status-page-tfstate-REPLACE_ME"
+bucket = "gitops-page-tfstate-REPLACE_ME"
 ```
 
 ## 3. Deploy Infrastructure Once Locally

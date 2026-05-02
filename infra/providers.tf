@@ -18,7 +18,7 @@ terraform {
 
   backend "s3" {
     # Replace with your unique bucket name (created in Task 6 bootstrap)
-    bucket = "gitops-status-page-tfstate-REPLACE_ME"
+    bucket = "gitops-page-tfstate-REPLACE_ME"
     key    = "terraform.tfstate"
     region = "eu-north-1"
   }
