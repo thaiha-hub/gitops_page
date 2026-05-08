@@ -1,9 +1,9 @@
-# ── Random suffix so S3 bucket names are globally unique ─────────────────────
+# Random suffix so S3 bucket names are globally unique
 resource "random_id" "suffix" {
   byte_length = 4
 }
 
-# ── S3 bucket for static frontend files ──────────────────────────────────────
+# S3 bucket for static frontend files 
 resource "aws_s3_bucket" "frontend" {
   bucket        = "gitops-page-${random_id.suffix.hex}"
   force_destroy = true
@@ -17,7 +17,7 @@ resource "aws_s3_bucket_public_access_block" "frontend" {
   restrict_public_buckets = true
 }
 
-# ── CloudFront Origin Access Control (OAC) ───────────────────────────────────
+# CloudFront Origin Access Control (OAC)
 resource "aws_cloudfront_origin_access_control" "frontend" {
   name                              = "gitops-page-oac"
   origin_access_control_origin_type = "s3"
@@ -47,7 +47,7 @@ resource "aws_s3_bucket_policy" "frontend" {
   depends_on = [aws_cloudfront_distribution.frontend]
 }
 
-# ── CloudFront distribution ───────────────────────────────────────────────────
+# CloudFront distribution
 resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
   default_root_object = "index.html"
@@ -84,7 +84,7 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 }
 
-# ── Lambda execution role ─────────────────────────────────────────────────────
+# Lambda execution role
 resource "aws_iam_role" "lambda" {
   name = "gitops-status-page-lambda"
 
@@ -103,7 +103,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# ── Lambda function ───────────────────────────────────────────────────────────
+# Lambda function 
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "${path.module}/../lambda/handler.py"
@@ -112,16 +112,16 @@ data "archive_file" "lambda" {
 
 resource "aws_lambda_function" "info" {
   filename         = data.archive_file.lambda.output_path
-  function_name    = "gitops-status-page-info"
+  function_name    = "gitops-page-info"
   role             = aws_iam_role.lambda.arn
   handler          = "handler.handler"
   runtime          = "python3.12"
   source_code_hash = data.archive_file.lambda.output_base64sha256
 }
 
-# ── API Gateway HTTP API ──────────────────────────────────────────────────────
+# API Gateway HTTP API 
 resource "aws_apigatewayv2_api" "info" {
-  name          = "gitops-status-page"
+  name          = "gitops-page"
   protocol_type = "HTTP"
 
   cors_configuration {
@@ -158,7 +158,7 @@ resource "aws_lambda_permission" "apigw" {
   source_arn    = "${aws_apigatewayv2_api.info.execution_arn}/*/*"
 }
 
-# ── GitHub OIDC provider ──────────────────────────────────────────────────────
+# GitHub OIDC provider 
 resource "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
 
@@ -168,11 +168,11 @@ resource "aws_iam_openid_connect_provider" "github" {
   thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
 }
 
-# ── GitHub Actions IAM role ───────────────────────────────────────────────────
+# GitHub Actions IAM role
 data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "github_actions" {
-  name = "gitops-status-page-github-actions"
+  name = "gitops-page-github-actions"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -267,7 +267,7 @@ resource "aws_iam_role_policy" "github_actions" {
           "lambda:RemovePermission",
           "lambda:TagResource"
         ]
-        Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:gitops-status-page-*"
+        Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:gitops-page-*"
       },
       {
         Sid      = "APIGateway"
@@ -279,7 +279,7 @@ resource "aws_iam_role_policy" "github_actions" {
         Sid      = "IAMPassRole"
         Effect   = "Allow"
         Action   = ["iam:PassRole"]
-        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-status-page-*"
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-page-*"
       },
       {
         Sid    = "IAMManage"
@@ -302,7 +302,7 @@ resource "aws_iam_role_policy" "github_actions" {
           "iam:DeleteRole"
         ]
         Resource = [
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-status-page-*",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-page-*",
           "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
         ]
       },
